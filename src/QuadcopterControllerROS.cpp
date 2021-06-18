@@ -32,11 +32,9 @@ const std::string rotorname[] = { "RotorDevice0", "RotorDevice1", "RotorDevice2"
 #define A_BUTTON 0
 #define POWER_BUTTON A_BUTTON
 
+#define R_STICK_BUTTON 12
+
 const int rotorAxis[] = {
-///    Joystick::L_STICK_V_AXIS, //1
-///    Joystick::R_STICK_H_AXIS, //2
-///    Joystick::R_STICK_V_AXIS, //3
-///    Joystick::L_STICK_H_AXIS  //0
     L_STICK_V_AXIS,
     R_STICK_H_AXIS,
     R_STICK_V_AXIS,
@@ -44,8 +42,6 @@ const int rotorAxis[] = {
 };
 
 
-///int cameraAxis = Joystick::DIRECTIONAL_PAD_V_AXIS;
-///const int powerButton = Joystick::A_BUTTON;
 int cameraAxis = DIRECTIONAL_PAD_V_AXIS;
 const int powerButton = A_BUTTON;
 
@@ -158,10 +154,9 @@ bool QuadcopterControllerROS::initialize(SimpleControllerIO* io)
     dxyref = dxyprev = Vector2::Zero();
 
     power = powerprev = false;
+    isStableMode = powerprev = false;
 
-    ///joystick = io->getOrCreateSharedObject<SharedJoystick>("joystick");
     //targetMode = joystick->addMode();
-    targetMode = 0;
     rotorswitch = false;
 
     joystickSubscriber = node->subscribe("joy", 1, &QuadcopterControllerROS::joystickCallback, this);
@@ -194,8 +189,6 @@ void QuadcopterControllerROS::joystickCallback(const sensor_msgs::Joy& msg)
 
 bool QuadcopterControllerROS::control()
 {
-    ///joystick->updateState(targetMode);
-    
     sensor_msgs::Joy joystick;
     {
         std::lock_guard<mutex> lock(joystickMutex);
@@ -213,9 +206,7 @@ bool QuadcopterControllerROS::control()
     Vector4 torque = Vector4::Zero();
     
     ///power = joystick->getButtonState(targetMode, powerButton);
-    
     power = joystick.buttons[POWER_BUTTON];
-
     if(power == false) {
         powerprev = false;
     } else if((power == true) && (powerprev != true)) {
@@ -223,15 +214,14 @@ bool QuadcopterControllerROS::control()
         powerprev = true;
     }
 
-/*
-    bool modeButtonState = joystick->getButtonState(Joystick::R_STICK_BUTTON);
+    ///bool modeButtonState = joystick->getButtonState(Joystick::R_STICK_BUTTON);
+    bool modeButtonState = joystick.buttons[R_STICK_BUTTON];
     if(modeButtonState){
         if(!prevModeButtonState){
             isStableMode = !isStableMode;
         }
     }
     prevModeButtonState = modeButtonState;
-*/
 
     if(rotorswitch) {
         Vector4 f;
@@ -247,7 +237,6 @@ bool QuadcopterControllerROS::control()
         Vector2 ddxy_local = Eigen::Rotation2Dd(-zrpy[3]) * ddxy;
 
         for(int axis = 0; axis < 4; ++axis) {
-            ///double pos = joystick->getPosition(targetMode, rotorAxis[axis]);
             double pos = -joystick.axes[rotorAxis[axis]];
 
             if((axis == 0) || (axis == 3)) {
@@ -259,14 +248,16 @@ bool QuadcopterControllerROS::control()
                 f[axis] = KP[axis] * (dzrpyref[axis] - dzrpy[axis]) + KD[axis] * (0.0 - ddzrpy[axis]);
             } else {
                 if(!isStableMode){
-                    if(fabs(pos) > 0.25) {
+                    ///if(fabs(pos) > 0.25) {
+                    if(fabs(pos) > 0.15) {
                         zrpyref[axis] = RATE[axis] * pos;
                     } else {
                         zrpyref[axis] = 0.0;
                     }
                 } else {
                     int axis_xy = axis - 1;
-                    if(fabs(pos) > 0.25) {
+                    ///if(fabs(pos) > 0.25) {
+                    if(fabs(pos) > 0.15) {
                         dxyref[axis_xy] = RATEX[axis_xy] * pos;
                     } else {
                         dxyref[axis_xy] = 0.0;
@@ -320,9 +311,7 @@ bool QuadcopterControllerROS::control()
     static const double P = 0.00002;
     static const double D = 0.00004;
     double dq = (q - qprev) / timeStep;
-    ///double pos = joystick->getPosition(targetMode, cameraAxis) * -1.0;
     double pos = joystick.axes[cameraAxis];
-    ///double pos = 0;
     double dqref = 0.0;
     if(fabs(pos) > 0.25) {
         double deltaq = 0.002 * pos;

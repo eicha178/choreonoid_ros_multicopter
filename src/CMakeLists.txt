@@ -3,8 +3,11 @@ if(NOT BUILD_MULTICOPTER_PLUGIN)
 endif()
 
 #if(BUILD_SIMPLE_CONTROLLER_SAMPLES)
-  choreonoid_add_simple_controller(QuadcopterControllerROS QuadcopterControllerROS.cpp)
-  target_link_libraries(QuadcopterControllerROS ${roscpp_LIBRARIES} CnoidMulticopterPlugin)
 
-  #install(FILES QuadcopterTwist.cnoid DESTINATION ${CNOID_SHARE_SUBDIR}/project)
+  choreonoid_add_simple_controller(QuadcopterControllerJoy QuadcopterControllerJoy.cpp)
+  target_link_libraries(QuadcopterControllerJoy ${roscpp_LIBRARIES} CnoidMulticopterPlugin)
+
+  choreonoid_add_simple_controller(QuadcopterControllerTwist QuadcopterControllerTwist.cpp)
+  target_link_libraries(QuadcopterControllerTwist ${roscpp_LIBRARIES} CnoidMulticopterPlugin)
+
 #endif()

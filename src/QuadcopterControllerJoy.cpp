@@ -62,7 +62,7 @@ const double KPX[] = { 0.4, 0.4 };
 const double KDX[] = { 0.4, 0.4 };
 const double RATEX[] = { -1.0, -1.0 };
 
-class QuadcopterControllerROS : public SimpleController
+class QuadcopterControllerJoy : public SimpleController
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -111,7 +111,7 @@ public:
 
 }
 
-bool QuadcopterControllerROS::configure(SimpleControllerConfig* config)
+bool QuadcopterControllerJoy::configure(SimpleControllerConfig* config)
 {
     if(!ros::isInitialized()){
         config->os() << config->controllerName()
@@ -122,7 +122,7 @@ bool QuadcopterControllerROS::configure(SimpleControllerConfig* config)
     return true;
 }
 
-bool QuadcopterControllerROS::initialize(SimpleControllerIO* io)
+bool QuadcopterControllerJoy::initialize(SimpleControllerIO* io)
 {
     ioBody = io->body();
     os = &io->os();
@@ -159,14 +159,14 @@ bool QuadcopterControllerROS::initialize(SimpleControllerIO* io)
     //targetMode = joystick->addMode();
     rotorswitch = false;
 
-    joystickSubscriber = node->subscribe("joy", 1, &QuadcopterControllerROS::joystickCallback, this);
+    joystickSubscriber = node->subscribe("joy", 1, &QuadcopterControllerJoy::joystickCallback, this);
 
 
     return true;
 }
 
 
-Vector4 QuadcopterControllerROS::getZRPY()
+Vector4 QuadcopterControllerJoy::getZRPY()
 {
     auto T = ioBody->rootLink()->position();
     double z = T.translation().z();
@@ -175,19 +175,19 @@ Vector4 QuadcopterControllerROS::getZRPY()
 }
     
 
-Vector2 QuadcopterControllerROS::getXY()
+Vector2 QuadcopterControllerJoy::getXY()
 {
     auto p = ioBody->rootLink()->translation();
     return Vector2(p.x(), p.y());
 }
 
-void QuadcopterControllerROS::joystickCallback(const sensor_msgs::Joy& msg)
+void QuadcopterControllerJoy::joystickCallback(const sensor_msgs::Joy& msg)
 {
     std::lock_guard<std::mutex> lock(joystickMutex);
     latestJoystickState = msg;
 }
 
-bool QuadcopterControllerROS::control()
+bool QuadcopterControllerJoy::control()
 {
     sensor_msgs::Joy joystick;
     {
@@ -329,9 +329,9 @@ bool QuadcopterControllerROS::control()
     return true;
 }
 
-void QuadcopterControllerROS::stop()
+void QuadcopterControllerJoy::stop()
 {
     joystickSubscriber.shutdown();
 }
 
-CNOID_IMPLEMENT_SIMPLE_CONTROLLER_FACTORY(QuadcopterControllerROS)
+CNOID_IMPLEMENT_SIMPLE_CONTROLLER_FACTORY(QuadcopterControllerJoy)

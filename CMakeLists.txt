@@ -27,4 +27,7 @@ link_directories(
   ${CHOREONOID_LIBRARY_DIRS}
 )
 
+add_executable(joy_to_msgs src/joy_to_msgs.cpp)
+target_link_libraries(joy_to_msgs ${catkin_LIBRARIES})
+
 add_subdirectory(src)

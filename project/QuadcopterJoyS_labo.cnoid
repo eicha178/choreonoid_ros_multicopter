@@ -9,7 +9,6 @@ items:
       name: "World"
       plugin: Body
       class: WorldItem
-      is_selected: true
       is_checked: true
       data: 
         collisionDetection: false
@@ -51,10 +50,11 @@ items:
               name: "QuadcopterController"
               plugin: Body
               class: SimpleControllerItem
+              is_selected: true
               data: 
                 isNoDelayMode: false
                 controllerOptions: ""
-                controller: "QuadcopterControllerROS"
+                controller: "QuadcopterControllerJoy"
                 baseDirectory: "Controller directory"
                 reloading: false
                 exportSymbols: false
@@ -138,7 +138,6 @@ items:
                   name: "AISTSimulator"
                   plugin: Body
                   class: AISTSimulatorItem
-                  is_selected: true
                   data: 
                     timeStep: 0.005
                     realtimeSync: true
@@ -281,7 +280,7 @@ views:
           isCurrent: true
           eye: [ -3.22404, -1.9665, 1.6908 ]
           direction: [ 0.797344, 0.502179, -0.334751 ]
-          up: [ 0.283253, 0.178397, 0.942307 ]
+          up: [ 0.283254, 0.178397, 0.942307 ]
       backgroundColor: [ 0.1, 0.1, 0.3 ]
       gridColor: [ 0.9, 0.9, 0.9, 1 ]
       xzgridColor: [ 0.9, 0.9, 0.9, 1 ]
@@ -349,7 +348,7 @@ views:
           camera: BodyTrackingCamera
           eye: [ -3.22404, -1.9665, 1.6908 ]
           direction: [ 0.797344, 0.502179, -0.334751 ]
-          up: [ 0.283253, 0.178397, 0.942307 ]
+          up: [ 0.283254, 0.178397, 0.942307 ]
       backgroundColor: [ 0.1, 0.1, 0.3 ]
       gridColor: [ 0.9, 0.9, 0.9, 1 ]
       xzgridColor: [ 0.9, 0.9, 0.9, 1 ]
